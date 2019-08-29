@@ -17,8 +17,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
 
+	void SetToAppear();
+
 private:
+	// This actor's scale is adjusted each frame to be closer to the target scale.
 	float currentScale;
+	float targetScale;
 
 protected:
 	// Called when the game starts or when spawned
