@@ -11,6 +11,7 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "Actors/Organism.h"
 
 AGameOfLifeCharacter::AGameOfLifeCharacter()
 {
@@ -91,5 +92,17 @@ void AGameOfLifeCharacter::Tick(float DeltaSeconds)
 
 void AGameOfLifeCharacter::SpawnOrganismAtLocation(FVector location)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Character spawning."));
+	if (Organism)
+	{
+		UWorld* world = GetWorld();
+		if (world)
+		{
+			FActorSpawnParameters spawnParams;
+			spawnParams.Owner = this;
+
+			FRotator rotator;
+
+			world->SpawnActor<AOrganism>(Organism, location, rotator, spawnParams);
+		}
+	}
 }
