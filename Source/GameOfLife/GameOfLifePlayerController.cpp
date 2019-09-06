@@ -50,16 +50,25 @@ void AGameOfLifePlayerController::OnResetVR()
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
 }
 
+AGameOfLifeCharacter* AGameOfLifePlayerController::GetGameOfLifeCharacterWithCursor()
+{
+	if (AGameOfLifeCharacter * MyPawn = Cast<AGameOfLifeCharacter>(GetPawn()))
+	{
+		if (MyPawn->GetCursorToWorld())
+		{
+			return MyPawn;
+		}
+	}
+	return NULL;
+}
+
 void AGameOfLifePlayerController::MoveToMouseCursor()
 {
 	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
 	{
-		if (AGameOfLifeCharacter * MyPawn = Cast<AGameOfLifeCharacter>(GetPawn()))
+		if (AGameOfLifeCharacter * MyPawn = GetGameOfLifeCharacterWithCursor())
 		{
-			if (MyPawn->GetCursorToWorld())
-			{
-				UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
-			}
+			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, MyPawn->GetCursorToWorld()->GetComponentLocation());
 		}
 	}
 	else
@@ -119,5 +128,8 @@ void AGameOfLifePlayerController::OnSetDestinationReleased()
 
 void AGameOfLifePlayerController::SpawnOrganismAtMouse()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Spawning..."));
+	if (AGameOfLifeCharacter * MyPawn = GetGameOfLifeCharacterWithCursor())
+	{
+		MyPawn->SpawnOrganismAtLocation(MyPawn->GetCursorToWorld()->GetComponentLocation());
+	}
 }

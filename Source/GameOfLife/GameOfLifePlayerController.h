@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "GameOfLifeCharacter.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "GameOfLifePlayerController.generated.h"
@@ -25,6 +26,8 @@ protected:
 
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
+
+	AGameOfLifeCharacter* GetGameOfLifeCharacterWithCursor();
 
 	/** Navigate player to the current mouse cursor location. */
 	void MoveToMouseCursor();
