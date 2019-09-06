@@ -37,6 +37,12 @@ void AGameOfLifePlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AGameOfLifePlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("ResetVR", IE_Pressed, this, &AGameOfLifePlayerController::OnResetVR);
+
+	InputComponent->BindAction(
+		"SpawnOrganism",
+		IE_Pressed,
+		this,
+		&AGameOfLifePlayerController::SpawnOrganismAtMouse);
 }
 
 void AGameOfLifePlayerController::OnResetVR()
@@ -48,7 +54,7 @@ void AGameOfLifePlayerController::MoveToMouseCursor()
 {
 	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
 	{
-		if (AGameOfLifeCharacter* MyPawn = Cast<AGameOfLifeCharacter>(GetPawn()))
+		if (AGameOfLifeCharacter * MyPawn = Cast<AGameOfLifeCharacter>(GetPawn()))
 		{
 			if (MyPawn->GetCursorToWorld())
 			{
@@ -109,4 +115,9 @@ void AGameOfLifePlayerController::OnSetDestinationReleased()
 {
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
+}
+
+void AGameOfLifePlayerController::SpawnOrganismAtMouse()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Spawning..."));
 }

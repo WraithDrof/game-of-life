@@ -4,6 +4,8 @@
 #include "GameOfLifePlayerController.h"
 #include "GameOfLifeCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Engine/World.h"
+#include "Actors/Organism.h"
 
 AGameOfLifeGameMode::AGameOfLifeGameMode()
 {
@@ -11,7 +13,8 @@ AGameOfLifeGameMode::AGameOfLifeGameMode()
 	PlayerControllerClass = AGameOfLifePlayerController::StaticClass();
 
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(
+		TEXT("/Game/TopDownCPP/Blueprints/TopDownCharacter"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
