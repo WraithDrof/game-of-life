@@ -11,6 +11,13 @@ AGameOfLifePlayerController::AGameOfLifePlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+
+	TestPositionUpdater = new FPositionUpdater(2, 3);
+	LastUpdatedPositions.Add(FVector2D(5, 4)); // Should die
+	LastUpdatedPositions.Add(FVector2D(3, 5)); // Should die
+	LastUpdatedPositions.Add(FVector2D(5, 5)); // Should live
+	LastUpdatedPositions.Add(FVector2D(4, 5)); // Should live
+	LastUpdatedPositions.Add(FVector2D(6, 5)); // Should die
 }
 
 void AGameOfLifePlayerController::PlayerTick(float DeltaTime)
@@ -22,13 +29,6 @@ void AGameOfLifePlayerController::PlayerTick(float DeltaTime)
 	{
 		MoveToMouseCursor();
 	}
-
-	TestPositionUpdater = new FPositionUpdater(2, 3);
-	LastUpdatedPositions.Add(FVector2D(5, 5)); // Should die
-	LastUpdatedPositions.Add(FVector2D(4, 5)); // Should live
-	LastUpdatedPositions.Add(FVector2D(3, 5)); // Should live
-	LastUpdatedPositions.Add(FVector2D(6, 5)); // Should die
-	LastUpdatedPositions.Add(FVector2D(5, 4)); // Should die
 }
 
 void AGameOfLifePlayerController::SetupInputComponent()
@@ -135,10 +135,17 @@ void AGameOfLifePlayerController::OnSetDestinationReleased()
 
 void AGameOfLifePlayerController::SpawnOrganismAtMouse()
 {
-	if (AGameOfLifeCharacter * MyPawn = GetGameOfLifeCharacterWithCursor())
+	try
 	{
-		MyPawn->SpawnOrganismAtLocation(MyPawn->GetCursorToWorld()->GetComponentLocation());
-	}
+		if (AGameOfLifeCharacter * MyPawn = GetGameOfLifeCharacterWithCursor())
+		{
+			MyPawn->SpawnOrganismAtLocation(MyPawn->GetCursorToWorld()->GetComponentLocation());
+		}
 
-	LastUpdatedPositions = TestPositionUpdater->GetNextPositionUpdate(LastUpdatedPositions);
+		LastUpdatedPositions = TestPositionUpdater->GetNextPositionUpdate(LastUpdatedPositions);
+	}
+	catch (...)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Exception thrown, ignoring so the editor doesn't crash."));
+	}
 }

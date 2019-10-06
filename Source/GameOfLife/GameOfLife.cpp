@@ -7,3 +7,4 @@ IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, GameOfLife, "GameOfLife");
 
 DEFINE_LOG_CATEGORY(LogGameOfLife);
 DEFINE_LOG_CATEGORY(LogOrganisms);
+DEFINE_LOG_CATEGORY(LogPositionUpdater);

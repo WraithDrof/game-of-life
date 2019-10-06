@@ -6,3 +6,4 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogGameOfLife, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogOrganisms, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogPositionUpdater, Log, All);
