@@ -5,6 +5,7 @@
 #include "GameOfLifeCharacter.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "OrganismPosition.h"
 #include "OrganismManagement/PositionUpdater.h"
 #include "GameOfLifePlayerController.generated.h"
 
@@ -21,7 +22,7 @@ protected:
 	uint32 bMoveToMouseCursor : 1;
 	FPositionUpdater* TestPositionUpdater;
 
-	TArray<FVector2D> LastUpdatedPositions;
+	TArray<OrganismPosition> LastUpdatedPositions;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;

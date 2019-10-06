@@ -1,69 +1,123 @@
 #include "PositionUpdater.h"
 #include "GameOfLife.h"
 
-FPositionUpdater::FPositionUpdater(int survivalMinimum, int survivalMaximum)
+#define forEachCell(cellArray) for (auto cell : cellArray)
+
+FPositionUpdater::FPositionUpdater(int survivalMinimum, int survivalMaximum, int repopulationTarget)
 {
 	UE_LOG(
 		LogGameOfLife,
 		Log,
-		TEXT("Creating PositionUpdater with survival bounds as min = [%d], max = [%d]"),
+		TEXT("Creating PositionUpdater with survival bounds as min = [%d], max = [%d], repop = [%d]"),
 		survivalMinimum,
-		survivalMaximum);
+		survivalMaximum,
+		repopulationTarget);
 
 	SurvivalMinimum = survivalMinimum;
 	SurvivalMaximum = survivalMaximum;
+	RepopulationTarget = repopulationTarget;
 }
 
 FPositionUpdater::~FPositionUpdater()
 {
 }
 
-TArray<FVector2D> FPositionUpdater::GetNextPositionUpdate(TArray<FVector2D> previousCells)
+TArray<OrganismPosition> FPositionUpdater::GetNextPositionUpdate(TArray<OrganismPosition> previousCells)
 {
-	TArray<FVector2D> nextPositions;
+	TArray<OrganismPosition> nextPositions;
 
 	auto survivors = GetSurvivingLiveCells(previousCells);
-	/*auto newCells = GetNewCells(previousCells);
+	auto newCells = GetNewCells(previousCells);
 
 	nextPositions.Append(survivors);
-	nextPositions.Append(newCells);*/
+	nextPositions.Append(newCells);
+
+	UE_LOG(LogGameOfLife, Log, TEXT("Returning next position update:"));
+	forEachCell(nextPositions)
+	{
+		UE_LOG(LogGameOfLife, Log, TEXT("Alive cell: [%s]"), *cell.Position.ToString())
+	}
+	UE_LOG(LogGameOfLife, Log, TEXT("End returning next position update."));
 
 	return nextPositions;
 }
 
-TArray<FVector2D> FPositionUpdater::GetSurvivingLiveCells(TArray<FVector2D> previousCells)
+TArray<OrganismPosition> FPositionUpdater::GetSurvivingLiveCells(TArray<OrganismPosition> previousCells)
 {
 	checkf(
 		SurvivalMinimum <= SurvivalMaximum,
 		TEXT("SurvivalMinimum is not <= SurvivalMaximum! Cannot calculate surviving cells.")
 	);
 
-	TArray<FVector2D> survivingCells;
+	return GetCellsWithNeighbourRange(previousCells, SurvivalMinimum, SurvivalMaximum);
+}
 
-	for (auto previousCell : previousCells)
+TArray<OrganismPosition> FPositionUpdater::GetNewCells(TArray<OrganismPosition> survivingCells)
+{
+	checkf(
+		RepopulationTarget >= 0 && RepopulationTarget <= 4,
+		TEXT("RepopulationTarget is [%d] which is out of range!"),
+		RepopulationTarget
+	);
+	auto adjacentDeadCells = GetAdjacentDeadCells(survivingCells);
+	return GetCellsWithNeighbourRange(adjacentDeadCells, RepopulationTarget, RepopulationTarget);
+}
+
+TArray<OrganismPosition> FPositionUpdater::GetAdjacentDeadCells(TArray<OrganismPosition> survivingCells)
+{
+	// Get dead cells adjacent to previous cells so that we can see if they should be alive.
+	TArray<OrganismPosition> adjacentCells;
+
+	forEachCell(survivingCells)
 	{
-		auto neighbourCount = GetNeighboursAtCoordinate(previousCell, previousCells);
-		if (neighbourCount >= SurvivalMinimum && neighbourCount <= SurvivalMaximum)
+		//TODO: Potentially move cardinal direction calculations to a helper class.
+		OrganismPosition neighbours[] =
 		{
-			survivingCells.Add(previousCell);
-			UE_LOG(LogGameOfLife, Log, TEXT("Cell has survived: [%s]"), *previousCell.ToString());
-		}
-		else
+			OrganismPosition(cell.Position.X, cell.Position.Y - 1), // north
+			OrganismPosition(cell.Position.X + 1, cell.Position.Y), // east
+			OrganismPosition(cell.Position.X, cell.Position.Y + 1), // south
+			OrganismPosition(cell.Position.X - 1, cell.Position.Y) // west
+		};
+
+		// For each neighbour...
+		for (int i = 0; i < 4; i++)
 		{
-			UE_LOG(LogPositionUpdater, Log, TEXT("Cell has died: [%s]"), *previousCell.ToString());
+			// Add to the adjacent cells if it hasn't already, and isn't already a part of the
+			// surviving cells.
+			if (!adjacentCells.Contains(neighbours[i]) && !survivingCells.Contains(neighbours[i]))
+			{
+				adjacentCells.Add(neighbours[i]);
+			}
 		}
 	}
 
-	return survivingCells;
+	return adjacentCells;
 }
 
-int FPositionUpdater::GetNeighboursAtCoordinate(FVector2D coordinate, TArray<FVector2D> previousCells)
+TArray<OrganismPosition> FPositionUpdater::GetCellsWithNeighbourRange(TArray<OrganismPosition> cells, int minNeighbours, int maxNeighbours)
+{
+	TArray<OrganismPosition> cellsInRange;
+
+	forEachCell(cells)
+	{
+		auto neighbourCount = GetNeighboursAtCoordinate(cell, cells);
+		auto inRange = neighbourCount >= minNeighbours && neighbourCount <= maxNeighbours;
+		if (inRange)
+		{
+			cellsInRange.Add(cell);
+		}
+	}
+
+	return cellsInRange;
+}
+
+int FPositionUpdater::GetNeighboursAtCoordinate(OrganismPosition coordinate, TArray<OrganismPosition> previousCells)
 {
 	int neighbours = 0;
 
-	for (auto previousCell : previousCells)
+	forEachCell(previousCells)
 	{
-		if (FVector2D::Distance(coordinate, previousCell) == 1)
+		if (FVector2D::Distance(coordinate.Position, cell.Position) == 1)
 		{
 			neighbours++;
 		}
@@ -72,22 +126,4 @@ int FPositionUpdater::GetNeighboursAtCoordinate(FVector2D coordinate, TArray<FVe
 	return neighbours;
 }
 
-TArray<FVector2D> FPositionUpdater::GetNewCells(TArray<FVector2D> previousCells)
-{
-	return TArray<FVector2D>();
-}
-
-bool FPositionUpdater::GetIfShouldBeAlive(FVector2D cell, TArray<FVector2D> previousCells)
-{
-	return false;
-}
-
-bool FPositionUpdater::GetIfDeadCellShouldBeAlive(FVector2D, TArray<FVector2D> previousCells)
-{
-	return false;
-}
-
-bool FPositionUpdater::GetIfAliveCellShouldBeAlive(FVector2D, TArray<FVector2D> previousCells)
-{
-	return false;
-}
+#undef forEachCell

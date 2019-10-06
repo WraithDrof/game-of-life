@@ -1,8 +1,7 @@
-
-
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OrganismPosition.h"
 
 /**
  *
@@ -10,10 +9,10 @@
 class GAMEOFLIFE_API FPositionUpdater
 {
 public:
-	FPositionUpdater(int survivalMinimum, int survivalMaximum);
+	FPositionUpdater(int survivalMinimum, int survivalMaximum, int repopulationTarget);
 	~FPositionUpdater();
 
-	TArray<FVector2D> GetNextPositionUpdate(TArray<FVector2D> previousCells);
+	TArray<OrganismPosition> GetNextPositionUpdate(TArray<OrganismPosition> previousCells);
 
 private:
 	// Parameters
@@ -21,12 +20,18 @@ private:
 	int AreaHeight;
 	int SurvivalMinimum; // The minimum number of neighbours a live cell can have before it dies.
 	int SurvivalMaximum; // The maximum number of neighbours a live cell can have before it dies.
+	int RepopulationTarget; // The exact number of neighbours a dead cell must have for it to repopulate.
 
-	TArray<FVector2D> GetSurvivingLiveCells(TArray<FVector2D> previousCells);
-	TArray<FVector2D> GetNewCells(TArray<FVector2D> previousCells);
+	TArray<OrganismPosition> GetSurvivingLiveCells(TArray<OrganismPosition> previousCells);
 
-	bool GetIfShouldBeAlive(FVector2D cell, TArray<FVector2D> previousCells);
-	bool GetIfDeadCellShouldBeAlive(FVector2D, TArray<FVector2D> previousCells);
-	bool GetIfAliveCellShouldBeAlive(FVector2D, TArray<FVector2D> previousCells);
-	int GetNeighboursAtCoordinate(FVector2D coordinate, TArray<FVector2D> previousCells);
+	TArray<OrganismPosition> GetNewCells(TArray<OrganismPosition> survivingCells);
+	TArray<OrganismPosition> GetAdjacentDeadCells(TArray<OrganismPosition> survivingCells);
+
+	// Used by both
+	TArray<OrganismPosition> GetCellsWithNeighbourRange(
+		TArray<OrganismPosition> cells,
+		int minNeighbours,
+		int maxNeighbours
+	);
+	int GetNeighboursAtCoordinate(OrganismPosition coordinate, TArray<OrganismPosition> currentCells);
 };

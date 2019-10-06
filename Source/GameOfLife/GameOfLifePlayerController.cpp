@@ -12,12 +12,12 @@ AGameOfLifePlayerController::AGameOfLifePlayerController()
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 
-	TestPositionUpdater = new FPositionUpdater(2, 3);
-	LastUpdatedPositions.Add(FVector2D(5, 4)); // Should die
-	LastUpdatedPositions.Add(FVector2D(3, 5)); // Should die
-	LastUpdatedPositions.Add(FVector2D(5, 5)); // Should live
-	LastUpdatedPositions.Add(FVector2D(4, 5)); // Should live
-	LastUpdatedPositions.Add(FVector2D(6, 5)); // Should die
+	TestPositionUpdater = new FPositionUpdater(2, 3, 3);
+	LastUpdatedPositions.Add(OrganismPosition(5, 4)); // Should die
+	LastUpdatedPositions.Add(OrganismPosition(3, 5)); // Should die
+	LastUpdatedPositions.Add(OrganismPosition(5, 5)); // Should live
+	LastUpdatedPositions.Add(OrganismPosition(4, 5)); // Should live
+	LastUpdatedPositions.Add(OrganismPosition(6, 5)); // Should die
 }
 
 void AGameOfLifePlayerController::PlayerTick(float DeltaTime)
